@@ -69,9 +69,11 @@ def shunting_yard(infix: list) -> list:
 
 
 def testes():
-    caso1 = ["1", "+", "3"]
+    caso1 = ["31", "*", "(", "4", "+", "10", ")"]
+    caso2 = ["1", "+", "3"]
 
-    assert shunting_yard(caso1) == ["1", "3", "+"]
+    assert shunting_yard(caso1) == ["31", "4", "10", "*", "+"]
+    assert shunting_yard(caso2) == ["1", "3", "+"]
 
 
 if __name__ == "__main__":
