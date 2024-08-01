@@ -30,6 +30,37 @@ def precedence(token: str, stack_top: str) -> bool:
     return precedence[token] < precedence[stack_top]
 
 
+def lexer(input_string: str) -> list:
+    NUMBER = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    OPERATOR = ["+", "-", "*", "/", "(", ")"]
+
+    tokens = []
+
+    """
+    São 3 casos, em cada um deles é necessário fazer uma coisa diferente:
+    - Se for um espaço ' '  -> descartar o valor
+    - Se for um operador    -> copiar o valor pra lista final
+    - Se for um numero      -> verificar se os próximos characters são numeros também 
+    """
+    number_buffer = ""
+    for i in input_string:
+        if i == " ":
+            if number_buffer:
+                tokens.append(number_buffer)
+                number_buffer = ""
+
+        if i in OPERATOR:
+            if number_buffer:
+                tokens.append(number_buffer)
+                number_buffer = ""
+            tokens.append(i)
+
+        if i in NUMBER:
+            number_buffer = number_buffer + i
+
+    return tokens
+
+
 def shunting_yard(infix: list) -> list:
     output = []
     stack = []
@@ -90,7 +121,9 @@ if __name__ == "__main__":
     15
     """
     # testes()
-    infix = ["9", "+", "24", "/", "(", "7", "-", "3", ")"]
+    # infix = ["9", "+", "24", "/", "(", "7", "-", "3", ")"]
 
-    result = shunting_yard(infix)
+    input_string = input("Digite uma expressão matemática: ")
+
+    result = shunting_yard(lexer(input_string))
     print(result)
