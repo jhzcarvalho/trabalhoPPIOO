@@ -22,20 +22,20 @@
 #   While there are operators on the stack, pop them to the queue
 
 
+NUMBER = "0123456789"
+OPERATOR = "+-*/()"
+
+
 def precedence(token: str, stack_top: str) -> bool:
     """Retorna True se a precedencia to token for menor que a precedencia do primeiro elemento da stack"""
 
-    precedence = {"+": 0, "-": 0, "/": 1, "*": 1, "^": 2, "(": 0}
+    precedence = {"+": 2, "-": 1, "/": 3, "*": 4, "(": 0}
 
     return precedence[token] < precedence[stack_top]
 
 
 def lexer(input_string: str) -> list:
-    NUMBER = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-    OPERATOR = ["+", "-", "*", "/", "(", ")"]
-
     tokens = []
-
     """
     São 3 casos, em cada um deles é necessário fazer uma coisa diferente:
     - Se for um espaço ' '  -> descartar o valor
@@ -58,6 +58,9 @@ def lexer(input_string: str) -> list:
         if i in NUMBER:
             number_buffer = number_buffer + i
 
+    if number_buffer:
+        tokens.append(number_buffer)
+
     return tokens
 
 
@@ -66,8 +69,6 @@ def shunting_yard(infix: list) -> list:
     stack = []
 
     for token in infix:
-        print(f"\nToken: {token}")
-
         if token.isnumeric():
             output.append(token)
 
@@ -90,13 +91,44 @@ def shunting_yard(infix: list) -> list:
         else:
             print("An error occured")
 
-        print(f"Stack:  {stack}")
-        print(f"Output: {output}")
-
     while stack:
         output.append(stack.pop(0))
 
     return output
+
+
+def eval_step(tokens: list):
+    """
+    1. Percorrer a lista
+    2. Verificar se o token é NUMBER ou OPERATOR
+        - Se for NUMBER salvar em uma pilhas
+        - Se for OPERATOR remover dois numeros do topo da pilha,
+          realizar a operação e add o resultado no topo da pilha
+    3. Repetir até chegar ao final da lista de tokens
+    4. Se nenhum erro ocorreu, a pilha deverá conter somente um numero, retornar a resposta
+
+    Deve ser possivel fazer recursivamente, mas não sei como...
+    """
+    number_stack = []
+
+    for token in tokens:
+        if token in OPERATOR:
+            right_num = number_stack.pop(0)
+            left_num = number_stack.pop(0)
+
+            if token == "+":
+                number_stack.insert(0, left_num + right_num)
+            elif token == "-":
+                number_stack.insert(0, left_num - right_num)
+            elif token == "*":
+                number_stack.insert(0, left_num * right_num)
+            elif token == "/":
+                number_stack.insert(0, left_num // right_num)
+
+        else:
+            number_stack.insert(0, int(token))
+
+    return number_stack[0]
 
 
 def testes():
@@ -119,11 +151,23 @@ if __name__ == "__main__":
     9 24 4 / +
     9 6 +
     15
-    """
     # testes()
-    # infix = ["9", "+", "24", "/", "(", "7", "-", "3", ")"]
-
-    input_string = input("Digite uma expressão matemática: ")
-
-    result = shunting_yard(lexer(input_string))
-    print(result)
+    """
+    # input_string = input("Digite uma expressão matemática: ")
+    test_list = [
+        "9 + 24 / ( 7 - 3 )",
+        "1 + 3",
+        "1 + 6",
+        "4 / 2 + 7",
+        "-20 + -51 + 20 + -68 * -11 + -35 * -14 - 95 - 32 + -52 * -23 - -90 * -42",
+    ]
+    for input_string in test_list:
+        print()
+        print(f"teste {input_string.split()}")
+        token_list = lexer(input_string)
+        print(f"token list{token_list}")
+        rpn = shunting_yard(token_list)
+        print(rpn)
+        result = eval_step(rpn)
+        print(result)
+    # print(solve_step(9, 2, "/"))
