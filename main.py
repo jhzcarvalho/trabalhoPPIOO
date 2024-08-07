@@ -29,20 +29,35 @@ OPERATOR = "+-*/()"
 def precedence(token: str, stack_top: str) -> bool:
     """Retorna True se a precedencia to token for menor que a precedencia do primeiro elemento da stack"""
 
-    precedence = {"+": 2, "-": 1, "/": 3, "*": 4, "(": 0}
+    precedence = {"+": 1, "-": 1, "/": 2, "*": 2, "(": 0}
 
     return precedence[token] < precedence[stack_top]
 
 
 def lexer(input_string: str) -> list:
     tokens = []
+
+    input_list = input_string.split(" ")
+
     """
     São 3 casos, em cada um deles é necessário fazer uma coisa diferente:
     - Se for um espaço ' '  -> descartar o valor
     - Se for um operador    -> copiar o valor pra lista final
     - Se for um numero      -> verificar se os próximos characters são numeros também 
     """
+
+    for i in input_list:
+        if "(" in i:
+            tokens.append("(")
+            tokens.append(i.split("(")[1])
+        elif ")" in i:
+            tokens.append(i.split(")")[0])
+            tokens.append(")")
+        else:
+            tokens.append(i)
+    """
     number_buffer = ""
+
     for i in input_string:
         if i == " ":
             if number_buffer:
@@ -61,6 +76,7 @@ def lexer(input_string: str) -> list:
     if number_buffer:
         tokens.append(number_buffer)
 
+    """
     return tokens
 
 
@@ -69,6 +85,8 @@ def shunting_yard(infix: list) -> list:
     stack = []
 
     for token in infix:
+        print(token)
+
         if token.isnumeric():
             output.append(token)
 
@@ -87,6 +105,11 @@ def shunting_yard(infix: list) -> list:
             while stack[0] != "(":
                 output.append(stack.pop(0))
             stack.pop(0)
+
+        # Gambiarra, se tiver um sinal de menos o isnumeric() retorna falso
+        # Se o primeiro valor do token for '-' testa o segundo valor
+        elif len(token) > 1 and token[1].isnumeric():
+            output.append(token)
 
         else:
             print("An error occured")
@@ -159,8 +182,10 @@ if __name__ == "__main__":
         "1 + 3",
         "1 + 6",
         "4 / 2 + 7",
+        "55 * 48 * -44 - -32 + 1 * -80 * -94 - 74 * -53 + -130 + -61",
         "-20 + -51 + 20 + -68 * -11 + -35 * -14 - 95 - 32 + -52 * -23 - -90 * -42",
     ]
+
     for input_string in test_list:
         print()
         print(f"teste {input_string.split()}")
