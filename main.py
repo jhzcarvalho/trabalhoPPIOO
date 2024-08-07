@@ -31,7 +31,7 @@ def precedence(token: str, stack_top: str) -> bool:
 
     precedence = {"+": 1, "-": 1, "/": 2, "*": 2, "(": 0}
 
-    return precedence[token] < precedence[stack_top]
+    return precedence[token] <= precedence[stack_top]
 
 
 def lexer(input_string: str) -> list:
@@ -85,7 +85,7 @@ def shunting_yard(infix: list) -> list:
     stack = []
 
     for token in infix:
-        print(token)
+        # print(token)
 
         if token.isnumeric():
             output.append(token)
@@ -115,7 +115,10 @@ def shunting_yard(infix: list) -> list:
             print("An error occured")
 
     while stack:
-        output.append(stack.pop(0))
+        op = stack.pop(0)
+
+        if op != "(":
+            output.append(op)
 
     return output
 
@@ -125,7 +128,7 @@ def eval_step(tokens: list):
     1. Percorrer a lista
     2. Verificar se o token é NUMBER ou OPERATOR
         - Se for NUMBER salvar em uma pilhas
-        - Se for OPERATOR remover dois numeros do topo da pilha,
+        - Se for OPERATO ftR remover dois numeros do topo da pilha,
           realizar a operação e add o resultado no topo da pilha
     3. Repetir até chegar ao final da lista de tokens
     4. Se nenhum erro ocorreu, a pilha deverá conter somente um numero, retornar a resposta
@@ -135,6 +138,8 @@ def eval_step(tokens: list):
     number_stack = []
 
     for token in tokens:
+        print(f"{token} - {number_stack}")
+
         if token in OPERATOR:
             right_num = number_stack.pop(0)
             left_num = number_stack.pop(0)
@@ -182,13 +187,13 @@ if __name__ == "__main__":
         "1 + 3",
         "1 + 6",
         "4 / 2 + 7",
-        "55 * 48 * -44 - -32 + 1 * -80 * -94 - 74 * -53 + -130 + -61",
+        "55 * 48 * -44 - -32 + 1 * -80 * -94 - 74 * -53 + -30 + -61",
+        "(2 - 65 - (-24 + -97) * -5 * -61) * (-41 + 85 * 9 * -92 * (75 - 18))",
         "-20 + -51 + 20 + -68 * -11 + -35 * -14 - 95 - 32 + -52 * -23 - -90 * -42",
     ]
 
     for input_string in test_list:
         print()
-        print(f"teste {input_string.split()}")
         token_list = lexer(input_string)
         print(f"token list{token_list}")
         rpn = shunting_yard(token_list)
